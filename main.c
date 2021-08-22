@@ -14,7 +14,7 @@ typedef struct voiture
 
     char * marque;
     char * immatriculation;
-    
+
     int anneeProd;
 
     struct voiture * suivant;
@@ -34,8 +34,10 @@ void sauvegardeListe (t_voiture * ancre);
 void sauvegardeStruct (t_voiture * maStruct, FILE * fichier);
 
 char * phraseDynamique ();
+char * phraseDynamiqueRecup (char stockage [100]);
 
 t_voiture * saisieStruct ();
+t_voiture * recuperationListe ();
 t_voiture * ajoutFin (t_voiture * nouvelle, t_voiture * ancre);
 ////////////////////////////////////////////////////////////////
 
@@ -74,25 +76,29 @@ int main()
             }
             if(choixSuppression == 2)
             {
-                
+
             }
             if(choixSuppression == 3)
             {
-                
+
             }
             if(choixSuppression == 4)
             {
-                
-            }      
+
+            }
         }
 
         if(choix == 4)
         {
             sauvegardeListe(ancre);
         }
+        if(choix == 5)
+        {
+            ancre = recuperationListe();
+        }
 
-    } while (choix != 5);
-    
+    } while (choix != 6);
+
     return 0;
 }
 ////////////////////////////////////////////////////////////////
@@ -128,7 +134,7 @@ int menuSuppression ()
 {
     ///déclarations
     int choixUtil;
-    
+
     system("CLS");
 
     //affichage du menu
@@ -136,7 +142,7 @@ int menuSuppression ()
     printf("2 - Supprimer selon l'annee de production\n");
     printf("3 - Supprimer selon la marque\n");
     printf("4 - Supprimer selon le carburant\n");
-    printf("5 - Revenir au menu\n"); 
+    printf("5 - Revenir au menu\n");
     printf("\n\t Choix : ");
 
     //saisie blindée du choix de l'utilisateur
@@ -147,14 +153,14 @@ int menuSuppression ()
     }while(  choixUtil < 1 || choixUtil > 5);
 
     //rendre le choix de l'utilisateur
-    return choixUtil; 
+    return choixUtil;
 }
 ////////////////////////////////////////////////////////////////
 
 //AJOUT EN FIN DE LISTE/////////////////////////////////////////
 t_voiture * ajoutFin (t_voiture * nouvelle, t_voiture * ancre)
 {
-    t_voiture * courant; 
+    t_voiture * courant;
 
     if(ancre == NULL)
     {
@@ -184,7 +190,7 @@ int menu ()
 {
    ///déclarations
    int choixUtil;
-   
+
     system("CLS");
 
    //affichage du menu
@@ -193,7 +199,7 @@ int menu ()
    printf("3 - Supprimer une voiture de la base de donnees\n");
    printf("4 - Sauvegarder la base de donnee\n");
    printf("5 - Charger une base de donnee sauvegardee\n");
-   printf("6 - Quitter le programme\n"); 
+   printf("6 - Quitter le programme\n");
    printf("\n\t Choix : ");
 
    //saisie blindée du choix de l'utilisateur
@@ -216,7 +222,7 @@ t_voiture * saisieStruct ()
 
   //allocation dynamique de la structure
   maStruct = (t_voiture *) malloc (sizeof(t_voiture));
-   
+
     if(maStruct != NULL)
     {
       ///saisie
@@ -269,7 +275,7 @@ void affichageListe (t_voiture * ancre)
         printf("Affichage impossible, base de donnee vide\n");
         system("pause");
     }
-    
+
 }
 ////////////////////////////////////////////////////////////////
 
@@ -288,29 +294,35 @@ void affichageStruct (t_voiture * maStruct)
 void sauvegardeListe (t_voiture * ancre)
 {
     FILE * fichier;
-    
-    t_voiture * courant; 
+    FILE * nbsauvegarde;
+
+    int compteur = 0;
+
+    t_voiture * courant;
 
     fichier = fopen("base_donnee.txt", "w");
+    nbsauvegarde = fopen("nbSauv.txt", "w");
 
-    if(fichier != NULL && ancre != NULL)
+    if(fichier != NULL && nbsauvegarde!= NULL && ancre != NULL)
     {
         courant = ancre;
 
         while(courant->suivant!=NULL)
         {
+            compteur++;
             sauvegardeStruct(courant, fichier);
             printf("\n");
             courant = courant->suivant;
         }
         sauvegardeStruct(courant, fichier);
-
+        fprintf(nbsauvegarde, "%d", (compteur+1));
         printf("La base de donnee a bien ete sauvegardee\n");
         system("pause");
 
         fclose(fichier);
+        fclose(nbsauvegarde);
     }
-       
+
     else
     {
         system("CLS");
@@ -324,23 +336,84 @@ void sauvegardeListe (t_voiture * ancre)
 void sauvegardeStruct (t_voiture * maStruct, FILE * fichier)
 {
     //affichage
-    fprintf(fichier, "%s\n", maStruct->marque);
-    fprintf(fichier, "%s\n", maStruct->immatriculation);
-    fprintf(fichier, "%c\n", maStruct->essence);
+    fprintf(fichier, "%s\t", maStruct->marque);
+    fprintf(fichier, "%s\t", maStruct->immatriculation);
+    fprintf(fichier, "%c\t", maStruct->essence);
     fprintf(fichier, "%d\n", maStruct->anneeProd);
-    fprintf(fichier, "\n\n");
 }
 ////////////////////////////////////////////////////////////////
 
+//RECUPERATION DTB//////////////////////////////////////////////
 t_voiture * recuperationListe ()
 {
+    ///déclaration
+    t_voiture * ancre = NULL;
+    t_voiture * nouvelle = NULL;
+
     FILE * fichier;
+    FILE * nbSauvegarde;
+
+    char marque [100];
+    char immatriculation [100];
+    char essence;
+    int anneProd;
+
+    int nombre;
 
     fichier = fopen("base_donnee.txt", "r");
+    nbSauvegarde = fopen("nbSauv.txt", "r");
 
-    while (!feof(fichier))
+    fscanf(nbSauvegarde, "%d", & nombre);
+
+    if(fichier != NULL)
     {
-        /* code */
+        for(int i=0; i<nombre; i++)
+        {
+            fscanf(fichier, "%s", marque);
+            fscanf(fichier, "%s", immatriculation);
+            fscanf(fichier, "%c", &essence);
+            fscanf(fichier, "%c", &essence);
+            fscanf(fichier, "%d", &anneProd);
+
+            //allocation dynamique de la structure
+            nouvelle = (t_voiture *) malloc (sizeof(t_voiture));
+
+            if(nouvelle != NULL)
+            {
+                nouvelle->marque=phraseDynamiqueRecup(marque);
+                nouvelle->immatriculation=phraseDynamiqueRecup(immatriculation);
+                nouvelle->essence=essence;
+                nouvelle->anneeProd=anneProd;
+                nouvelle->suivant=NULL;
+
+                ancre = ajoutFin(nouvelle, ancre);
+            }
+        }
     }
-       
+
+    return ancre;
 }
+////////////////////////////////////////////////////////////////
+
+
+
+//SAISIE PHRASE DYNA////////////////////////////////////////////
+char * phraseDynamiqueRecup (char stockage [100])
+{
+    ///déclarations
+    char * phrase;
+    int longueur;
+
+    //longueur de la chaine saisie
+    longueur = strlen(stockage) + 1;
+
+    //allocation dynamique de la chaine
+    phrase = (char *) malloc (longueur * sizeof(char));
+
+    //copie de la chaine dans le tab alloué
+    strcpy(phrase, stockage);
+
+    //rendre le tab dyna
+    return phrase;
+}
+////////////////////////////////////////////////////////////////
