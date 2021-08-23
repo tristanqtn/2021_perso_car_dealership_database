@@ -39,12 +39,18 @@ char * phraseDynamiqueRecup (char stockage [100]);
 t_voiture * saisieStruct ();
 t_voiture * recuperationListe ();
 t_voiture * ajoutFin (t_voiture * nouvelle, t_voiture * ancre);
+
+t_voiture * suppressionProd (t_voiture * ancre);
+t_voiture * suppressionImmat (t_voiture * ancre);
+t_voiture * suppressionMarque (t_voiture * ancre);
+t_voiture * suppressionCarburant (t_voiture * ancre);
 ////////////////////////////////////////////////////////////////
 
 
 //MAIN//////////////////////////////////////////////////////////
 int main()
 {
+    //déclarations
     int choix;
     int choixSuppression;
 
@@ -53,38 +59,39 @@ int main()
 
     do
     {
+        //affichage menu et recuparetion du choix
         choix = menu();
 
         if(choix == 1)
-        {
-            nouvelle = saisieStruct();
-            ancre = ajoutFin(nouvelle, ancre);
+        {//saisir une nouvelle voiture
+            nouvelle = saisieStruct();//saisie
+            ancre = ajoutFin(nouvelle, ancre);//ajout dans la liste
         }
 
         if(choix == 2)
-        {
+        {//affichage de la liste
             affichageListe(ancre);
         }
 
         if(choix == 3)
-        {
-            choixSuppression = menuSuppression();
+        {//suppression
+            choixSuppression = menuSuppression();//affichage menu suppression et recuperation du choix
 
             if(choixSuppression == 1)
-            {
-
+            {//immatriculation
+                ancre = suppressionImmat(ancre);
             }
             if(choixSuppression == 2)
-            {
-
+            {//annee de production
+                ancre = suppressionProd(ancre);
             }
             if(choixSuppression == 3)
-            {
-
+            {//marque
+                ancre = suppressionMarque(ancre);
             }
             if(choixSuppression == 4)
-            {
-
+            {//carburant
+                ancre = suppressionCarburant(ancre); 
             }
         }
 
@@ -103,29 +110,274 @@ int main()
 }
 ////////////////////////////////////////////////////////////////
 
-//SAISIE PHRASE DYNA////////////////////////////////////////////
-char * phraseDynamique ()
+//SUPPRESSION IMMATRICULATION///////////////////////////////////
+t_voiture * suppressionImmat (t_voiture * ancre)
 {
-    ///déclarations
-    char * phrase;
-    char stockage [100];
-    int longueur;
+    ///délcarations
+    char * immatSupp;
 
-    //saisie de la chaine à stocker
-    fflush(stdin);
-    gets(stockage);
+    t_voiture * courant = NULL;
+    t_voiture * precedent = NULL;
 
-    //longueur de la chaine saisie
-    longueur = strlen(stockage) + 1;
+    int sortie = 0;
 
-    //allocation dynamique de la chaine
-    phrase = (char *) malloc (longueur * sizeof(char));
+    if(ancre != NULL)
+    {
+        //saisie de l'immatriculation
+        system("CLS");
+        printf("Immatriculation a supprimer : ");
+        immatSupp = phraseDynamique();
 
-    //copie de la chaine dans le tab alloué
-    strcpy(phrase, stockage);
+        courant = ancre;//initialisation de la variable de parcours
 
-    //rendre le tab dyna
-    return phrase;
+        while(sortie == 0 && courant->suivant!=NULL)
+        {//fin de liste ou ordre de sortie
+            if(strcmp(courant->immatriculation, immatSupp) == 0)
+            {//test immatriculation
+                if(precedent == NULL)
+                {//on supprime l'ancre
+                   ancre = ancre->suivant;
+                   free(courant);
+                }
+                else
+                {//maillon de la liste
+                    precedent->suivant= courant->suivant;
+                    free(courant);
+                }
+
+                sortie = 1;//ordre de sortie
+                printf("\nVoiture trouvee et suprimee\n");
+                system("pause");
+            }
+            precedent = courant;//parcours
+            courant = courant->suivant;//parcours
+        }
+        if(strcmp(courant->immatriculation, immatSupp) == 0)
+        {//test pour la derniere voiture
+            free(courant);
+            precedent->suivant =NULL;
+            printf("\nVoiture trouvee et suprimee\n");
+            system("pause");
+        }
+    }
+    else
+    {
+        system("CLS");
+        printf("Suppression impossible, liste vide\n");
+        system("pause");
+    }
+    //rendu de l'ancre
+    return ancre;
+}
+////////////////////////////////////////////////////////////////
+
+//SUPPRESSION ANNEE PRODUCTION//////////////////////////////////
+t_voiture * suppressionProd (t_voiture * ancre)
+{
+    ///délcarations
+    int anneProd;
+
+    t_voiture * courant = NULL;
+    t_voiture * precedent = NULL;
+
+    if(ancre != NULL)
+    {
+        //saisie de l'immatriculation
+        system("CLS");
+        printf("Anne de production a supprimer : ");
+        fflush(stdin);
+        scanf("%d", &anneProd);
+
+        courant = ancre;//initialisation de la variable de parcours
+
+        while(courant->suivant!=NULL)
+        {//fin de liste ou ordre de sortie
+            if(courant->anneeProd == anneProd)
+            {//test immatriculation
+                if(precedent == NULL)
+                {//on supprime l'ancre
+                   ancre = ancre->suivant;
+                   free(courant);
+                   courant = ancre;
+                }
+                else
+                {//maillon de la liste
+                    precedent->suivant= courant->suivant;
+                    free(courant);
+                    courant = ancre;
+                }
+                printf("\nVoiture trouvee et supprimee\n");
+                system("pause");
+            }
+            precedent = courant;//parcours
+            courant = courant->suivant;//parcours
+        }
+        if(courant->anneeProd == anneProd)
+        {//test pour la derniere voiture
+            free(courant);
+            precedent->suivant =NULL;
+            printf("\nVoiture trouvee et supprimee\n");
+            system("pause");
+        }
+    }
+    else
+    {
+        system("CLS");
+        printf("Suppression impossible, liste vide\n");
+        system("pause");
+    }
+    //rendu de l'ancre
+    return ancre;
+}
+////////////////////////////////////////////////////////////////
+
+//SUPPRESSION CARBURANT/////////////////////////////////////////
+t_voiture * suppressionCarburant (t_voiture * ancre)
+{
+    ///délcarations
+    char carbu;
+
+    t_voiture * courant = NULL;
+    t_voiture * precedent = NULL;
+
+    if(ancre != NULL)
+    {
+        //saisie de l'immatriculation
+        system("CLS");
+        printf("Anne de production a supprimer : ");
+        fflush(stdin);
+        scanf("%c", &carbu);
+
+        courant = ancre;//initialisation de la variable de parcours
+
+        while(courant->suivant!=NULL)
+        {//fin de liste ou ordre de sortie
+            if(courant->essence == carbu)
+            {//test immatriculation
+                if(precedent == NULL)
+                {//on supprime l'ancre
+                   ancre = ancre->suivant;
+                   free(courant);
+                   courant = ancre;
+                }
+                else
+                {//maillon de la liste
+                    precedent->suivant= courant->suivant;
+                    free(courant);
+                    courant = ancre;
+                }
+                printf("\nVoiture trouvee et supprimee\n");
+                system("pause");
+            }
+            precedent = courant;//parcours
+            courant = courant->suivant;//parcours
+        }
+        if(courant->essence == carbu)
+        {//test pour la derniere voiture
+            free(courant);
+            precedent->suivant =NULL;
+            printf("\nVoiture trouvee et supprimee\n");
+            system("pause");
+        }
+    }
+    else
+    {
+        system("CLS");
+        printf("Suppression impossible, liste vide\n");
+        system("pause");
+    }
+    //rendu de l'ancre
+    return ancre;
+}
+////////////////////////////////////////////////////////////////
+
+//SUPPRESSION MARQUE////////////////////////////////////////////
+t_voiture * suppressionMarque (t_voiture * ancre)
+{
+    ///délcarations
+    char * marque;
+
+    t_voiture * courant = NULL;
+    t_voiture * precedent = NULL;
+
+    if(ancre != NULL)
+    {
+        //saisie de l'marque
+        system("CLS");
+        printf("Immatriculation a supprimer : ");
+        marque = phraseDynamique();
+
+        courant = ancre;//initialisation de la variable de parcours
+
+        while(courant->suivant!=NULL)
+        {//fin de liste ou ordre de sortie
+            if(strcmp(courant->marque, marque) == 0)
+            {//test marque
+                if(precedent == NULL)
+                {//on supprime l'ancre
+                   ancre = ancre->suivant;
+                   free(courant);
+                   courant = ancre;
+                }
+                else
+                {//maillon de la liste
+                    precedent->suivant= courant->suivant;
+                    free(courant);
+                    courant = ancre;
+                }
+                printf("\nVoiture trouvee et suprimee\n");
+                system("pause");
+            }
+            precedent = courant;//parcours
+            courant = courant->suivant;//parcours
+        }
+        if(strcmp(courant->marque, marque) == 0)
+        {//test pour la derniere voiture
+            free(courant);
+            precedent->suivant =NULL;
+            printf("\nVoiture trouvee et suprimee\n");
+            system("pause");
+        }
+    }
+    else
+    {
+        system("CLS");
+        printf("Suppression impossible, liste vide\n");
+        system("pause");
+    }
+    
+
+    //rendu de l'ancre
+    return ancre;
+}
+////////////////////////////////////////////////////////////////
+
+//MENU//////////////////////////////////////////////////////////
+int menu ()
+{
+   ///déclarations
+   int choixUtil;
+
+    system("CLS");
+
+   //affichage du menu
+   printf("1 - Ajouter une nouvelle voiture dans la base de donnees\n");
+   printf("2 - Afficher toute les voitures dans la base de donnees\n");
+   printf("3 - Supprimer une voiture de la base de donnees\n");
+   printf("4 - Sauvegarder la base de donnee\n");
+   printf("5 - Charger une base de donnee sauvegardee\n");
+   printf("6 - Quitter le programme\n");
+   printf("\n\t Choix : ");
+
+   //saisie blindée du choix de l'utilisateur
+   do
+   {
+	fflush(stdin);
+	scanf("%d", &choixUtil);
+   }while(  choixUtil < 1 || choixUtil > 6);
+
+   //rendre le choix de l'utilisateur
+   return choixUtil;
 }
 ////////////////////////////////////////////////////////////////
 
@@ -160,57 +412,31 @@ int menuSuppression ()
 //AJOUT EN FIN DE LISTE/////////////////////////////////////////
 t_voiture * ajoutFin (t_voiture * nouvelle, t_voiture * ancre)
 {
+    //déclaration
     t_voiture * courant;
 
     if(ancre == NULL)
-    {
-        ancre = nouvelle;
+    {//si la liste est vide
+        ancre = nouvelle;//le nouveau maillon est l'ancre
     }
     else
-    {
-        courant = ancre;
+    {//si la liste contiet au moins 1 voiture
+        courant = ancre;//initialisation de la var de parcours
 
         while (courant->suivant != NULL)
-        {
+        {//parcours de la liste
             courant = courant->suivant;
         }
-        courant->suivant = nouvelle;
+        courant->suivant = nouvelle;//ajout en suivant du denier maillon
     }
 
+    //confirmation
     system("CLS");
-    printf("\nLa voiture a bien ete enregistree dans la base de donnees\n");
+    printf("La voiture a bien ete enregistree dans la base de donnees\n");
     system("pause");
 
+    //rendu de l'ancre
     return ancre;
-}
-////////////////////////////////////////////////////////////////
-
-//MENU//////////////////////////////////////////////////////////
-int menu ()
-{
-   ///déclarations
-   int choixUtil;
-
-    system("CLS");
-
-   //affichage du menu
-   printf("1 - Ajouter une nouvelle voiture dans la base de donnees\n");
-   printf("2 - Afficher toute les voitures dans la base de donnees\n");
-   printf("3 - Supprimer une voiture de la base de donnees\n");
-   printf("4 - Sauvegarder la base de donnee\n");
-   printf("5 - Charger une base de donnee sauvegardee\n");
-   printf("6 - Quitter le programme\n");
-   printf("\n\t Choix : ");
-
-   //saisie blindée du choix de l'utilisateur
-   do
-   {
-	fflush(stdin);
-	scanf("%d", &choixUtil);
-   }while(  choixUtil < 1 || choixUtil > 6);
-
-   //rendre le choix de l'utilisateur
-   return choixUtil;
 }
 ////////////////////////////////////////////////////////////////
 
@@ -253,24 +479,25 @@ t_voiture * saisieStruct ()
 //AFFICHAGE DE LA LISTE/////////////////////////////////////////
 void affichageListe (t_voiture * ancre)
 {
+    ///déclarations
     t_voiture * courant;
 
     if(ancre != NULL)
-    {
+    {//si il y a au moins une voiture dans la liste
         system("CLS");
-        courant = ancre;
+        courant = ancre;//initialisation de la var de parcours
 
         while(courant->suivant!=NULL)
-        {
-            affichageStruct(courant);
+        {//parcours
+            affichageStruct(courant);//affichage
             printf("\n");
-            courant = courant->suivant;
+            courant = courant->suivant;//parcours de la liste
         }
-        affichageStruct(courant);
-        system("pause");
+        affichageStruct(courant);//affichage de la dernière voiture
+        system("pause");//tempo
     }
     else
-    {
+    {//message d'erreur si dtb vide
         system("CLS");
         printf("Affichage impossible, base de donnee vide\n");
         system("pause");
@@ -293,6 +520,7 @@ void affichageStruct (t_voiture * maStruct)
 //SAUVEGARDE DE LA LISTE////////////////////////////////////////
 void sauvegardeListe (t_voiture * ancre)
 {
+    ///déclarations
     FILE * fichier;
     FILE * nbsauvegarde;
 
@@ -300,31 +528,35 @@ void sauvegardeListe (t_voiture * ancre)
 
     t_voiture * courant;
 
+    //ouverture des fichiers
     fichier = fopen("base_donnee.txt", "w");
     nbsauvegarde = fopen("nbSauv.txt", "w");
 
     if(fichier != NULL && nbsauvegarde!= NULL && ancre != NULL)
-    {
-        courant = ancre;
+    {//si les fichiers sont ouvert et au moins une voiture est enregistrée
+
+        courant = ancre;//variable de parcours
 
         while(courant->suivant!=NULL)
         {
-            compteur++;
-            sauvegardeStruct(courant, fichier);
-            printf("\n");
-            courant = courant->suivant;
+            compteur++;//compteur de voiture du système
+            sauvegardeStruct(courant, fichier);//sauvegarde de la voiture
+            courant = courant->suivant;//passage à la voiture suivant
         }
-        sauvegardeStruct(courant, fichier);
-        fprintf(nbsauvegarde, "%d", (compteur+1));
+        sauvegardeStruct(courant, fichier);//sauvegarde de la dernière voiture
+        fprintf(nbsauvegarde, "%d", (compteur+1));//sauvegarde du nb de voiture
+
+        //messages de confirmation
         printf("La base de donnee a bien ete sauvegardee\n");
         system("pause");
 
+        //fermeture des fichiers
         fclose(fichier);
         fclose(nbsauvegarde);
     }
 
     else
-    {
+    {//message d'erreur su pb dans les fichiers
         system("CLS");
         printf("Sauvegarde impossible, base de donnee vide\n");
         system("pause");
@@ -332,10 +564,10 @@ void sauvegardeListe (t_voiture * ancre)
 }
 ////////////////////////////////////////////////////////////////
 
-//AFFICHAGE/////////////////////////////////////////////////////
+//SAUVEGARDE DES STRUCUTRES/////////////////////////////////////
 void sauvegardeStruct (t_voiture * maStruct, FILE * fichier)
 {
-    //affichage
+    //ecriture fichier
     fprintf(fichier, "%s\t", maStruct->marque);
     fprintf(fichier, "%s\t", maStruct->immatriculation);
     fprintf(fichier, "%c\t", maStruct->essence);
@@ -360,18 +592,22 @@ t_voiture * recuperationListe ()
 
     int nombre;
 
+    //ouverture des fichiers
     fichier = fopen("base_donnee.txt", "r");
     nbSauvegarde = fopen("nbSauv.txt", "r");
 
-    fscanf(nbSauvegarde, "%d", & nombre);
+    if(fichier != NULL && nbSauvegarde != NULL)
+    {//si le fichier est ouvert
 
-    if(fichier != NULL)
-    {
+        //lecture du nombre de sauvegardes
+        fscanf(nbSauvegarde, "%d", &nombre);
+
         for(int i=0; i<nombre; i++)
-        {
+        {//pour le nombre de voitures dans le système
+            //lecture des attributs
             fscanf(fichier, "%s", marque);
             fscanf(fichier, "%s", immatriculation);
-            fscanf(fichier, "%c", &essence);
+            fscanf(fichier, "%c", &essence);//cette lecture lit l'espace entre l'immatriculation et l'essence
             fscanf(fichier, "%c", &essence);
             fscanf(fichier, "%d", &anneProd);
 
@@ -379,18 +615,21 @@ t_voiture * recuperationListe ()
             nouvelle = (t_voiture *) malloc (sizeof(t_voiture));
 
             if(nouvelle != NULL)
-            {
+            {//si alloc reussie
+                //stockage des données dans la struct
                 nouvelle->marque=phraseDynamiqueRecup(marque);
                 nouvelle->immatriculation=phraseDynamiqueRecup(immatriculation);
                 nouvelle->essence=essence;
                 nouvelle->anneeProd=anneProd;
                 nouvelle->suivant=NULL;
 
+                //chainage du maillon
                 ancre = ajoutFin(nouvelle, ancre);
             }
         }
     }
 
+    //rendu du maillon ancre
     return ancre;
 }
 ////////////////////////////////////////////////////////////////
@@ -403,6 +642,32 @@ char * phraseDynamiqueRecup (char stockage [100])
     ///déclarations
     char * phrase;
     int longueur;
+
+    //longueur de la chaine saisie
+    longueur = strlen(stockage) + 1;
+
+    //allocation dynamique de la chaine
+    phrase = (char *) malloc (longueur * sizeof(char));
+
+    //copie de la chaine dans le tab alloué
+    strcpy(phrase, stockage);
+
+    //rendre le tab dyna
+    return phrase;
+}
+////////////////////////////////////////////////////////////////
+
+//SAISIE PHRASE DYNA////////////////////////////////////////////
+char * phraseDynamique ()
+{
+    ///déclarations
+    char * phrase;
+    char stockage [100];
+    int longueur;
+
+    //saisie de la chaine à stocker
+    fflush(stdin);
+    gets(stockage);
 
     //longueur de la chaine saisie
     longueur = strlen(stockage) + 1;
